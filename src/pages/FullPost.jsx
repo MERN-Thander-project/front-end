@@ -11,7 +11,7 @@ export const FullPost = () => {
   const params = useParams()
   const { data, error, isLoading } = useGetOnePostQuery(params.id);
   const [deletePostMutation] = useDeletePostMutation();
-
+  console.log(data)
   return (
     <>
       {isLoading ? <Post isLoading={true} /> : <Post

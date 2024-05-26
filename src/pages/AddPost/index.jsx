@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import TextField from '@mui/material/TextField';
 import Paper from '@mui/material/Paper';
 import Button from '@mui/material/Button';
@@ -6,23 +6,26 @@ import SimpleMDE from 'react-simplemde-editor';
 
 import 'easymde/dist/easymde.min.css';
 import styles from './AddPost.module.scss';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { selectAuthData } from '../../redux/slices/authSlice';
 import { useSelector } from 'react-redux';
 import { useRef } from 'react';
-import { useCreatePostMutation, useUploadImageMutation } from '../../services/post';
+import { useCreatePostMutation, useGetOnePostQuery, useUpdatePostMutation, useUploadImageMutation } from '../../services/post';
 
 export const AddPost = () => {
+  const params = useParams()
   const navigate = useNavigate()
+  const { data: postData, isLoading: isLoadingPostOne } = useGetOnePostQuery(params.id)
   const [uploadImageMutation, { data, error, isLoading }] = useUploadImageMutation();
   const [createPostMutation, { isLoadingPost, errorPost }] = useCreatePostMutation();
+  const [updatePostMutation] = useUpdatePostMutation();
   const isAuth = useSelector(selectAuthData)
   const [imageUrl, setImageUrl] = React.useState('');
   const [text, setText] = React.useState('');
   const [title, setaTitle] = React.useState('');
   const [tags, setTags] = React.useState('');
   const inputFileRef = useRef(null)
-
+  const isEditing = Boolean(params.id)
   const handleChangeFile = async (event) => {
     try {
       // Отримуємо вибраний файл з події
@@ -40,7 +43,15 @@ export const AddPost = () => {
       console.error('Error uploading image:', error);
     }
   };
+  useEffect(() => {
 
+    if (!isLoadingPostOne && params.id) {
+      setaTitle(postData.title);
+      setText(postData.text);
+      setImageUrl(postData.imageUrl);
+      setTags(postData.tags.join(','));
+    }
+  }, [isLoadingPostOne]);
 
   const onClickRemoveImage = async (event) => {
     setImageUrl('')
@@ -54,18 +65,19 @@ export const AddPost = () => {
         tags,
         text
       }
-      const result = await createPostMutation(fields)
-      console.log(result.data._id)
-      navigate(`/posts/${result.data._id}`)
+      console.log(fields)
+      const result = isEditing ?await updatePostMutation({ id :params.id, post: fields }): await createPostMutation(fields)  
+      const _id = isEditing ? params.id : result.data._id
+      navigate(`/posts/${_id}`)
     } catch (error) {
-      
+
     }
   }
   const onChange = React.useCallback((value) => {
     setText(value);
   }, []);
 
-  console.log(title, tags, text)
+
   const options = React.useMemo(
     () => ({
       spellChecker: false,
@@ -117,7 +129,7 @@ export const AddPost = () => {
       <SimpleMDE className={styles.editor} value={text} onChange={onChange} options={options} />
       <div className={styles.buttons}>
         <Button onClick={onSubmit} size="large" variant="contained">
-          Опублікувати
+          {isEditing?"Зберігти":"Опублікувати"}
         </Button>
         <a href="/">
           <Button size="large">Скасувати</Button>

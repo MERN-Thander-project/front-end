@@ -6,24 +6,23 @@ import Grid from '@mui/material/Grid';
 import { Post } from '../components/Post';
 import { TagsBlock } from '../components/TagsBlock';
 import { CommentsBlock } from '../components/CommentsBlock';
-import { useGetAllPostQuery } from '../services/post';
+import { useGetAllPostQuery, useGetOnePostQuery } from '../services/post';
 import { useGetAllTegsQuery } from '../services/tegs';
 import { useSelector } from 'react-redux';
 import { selectAuthData } from '../redux/slices/authSlice';
+import { useParams } from 'react-router-dom';
 
 export const Home = (props) => {
   const { data: postsData, error: postsError, isLoading: postsLoading, refetch, isFetching } = useGetAllPostQuery();
   const { data: tagsData, error: tagsError, isLoading: tagsLoading } = useGetAllTegsQuery();
   const isAuth = useSelector(selectAuthData)
-  
+  const params = useParams()
+  const { data, error, isLoading } = useGetOnePostQuery('66452eaf3f02da1752e3ea83');
+
+  console.log(data)
   useEffect(() => {
-    // console.log(postsData.map((obj)=> {
-    //   console.log(obj.imageUrl)
-    // }))
-    console.log(postsData)
     refetch();
-    
-  }, [props,postsData]);
+  }, [props]);
   
   return (
     <>
