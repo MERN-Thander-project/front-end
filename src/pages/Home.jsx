@@ -17,9 +17,14 @@ export const Home = (props) => {
   const isAuth = useSelector(selectAuthData)
   
   useEffect(() => {
+    // console.log(postsData.map((obj)=> {
+    //   console.log(obj.imageUrl)
+    // }))
+    console.log(postsData)
     refetch();
-  }, [props]);
-
+    
+  }, [props,postsData]);
+  
   return (
     <>
       <Tabs style={{ marginBottom: 15 }} value={0} aria-label="basic tabs example">
@@ -31,11 +36,12 @@ export const Home = (props) => {
           {postsLoading || isFetching
             ? [...Array(5)].map((_, index) => <Post key={index} tags={[]} isLoading={true} />)
             : postsData.map((obj) => (
+              
               <Post
                 key={obj._id}
                 _id={obj._id}
                 title={obj.title}
-                imageUrl={obj.imageUrl}
+                imageUrl={obj.imageUrl?`http://localhost:4444${obj.imageUrl}`:''}
                 user={obj.user}
                 createdAt={obj.createdAt}
                 viewsCount={obj.viewsCount}

@@ -5,18 +5,20 @@ import { Index } from "../components/AddComment";
 import { CommentsBlock } from "../components/CommentsBlock";
 import { useParams } from "react-router-dom";
 
-import { useGetOnePostQuery } from "../services/post";
+import { useDeletePostMutation, useGetOnePostQuery } from "../services/post";
+import ReactMarkdown from "react-markdown";
 export const FullPost = () => {
   const params = useParams()
   const { data, error, isLoading } = useGetOnePostQuery(params.id);
-  console.log(isLoading)
+  const [deletePostMutation] = useDeletePostMutation();
+
   return (
     <>
       {isLoading ? <Post isLoading={true} /> : <Post
         isLoading={false}
         id={data._id}
         title={data.title}
-        imageUrl={data.imegeUrl}
+        imageUrl={`http://localhost:4444${data.imageUrl}`}
         user={data.user}
         createdAt={data.createdAt}
         viewsCount={data.viewsCount}
@@ -24,9 +26,7 @@ export const FullPost = () => {
         tags={data.tags}
         isFullPost
       >
-        <p>
-          {data.text}
-        </p>
+        <ReactMarkdown children={data.text}/>
       </Post>}
 
       <CommentsBlock
